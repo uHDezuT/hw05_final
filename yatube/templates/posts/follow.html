@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+{% block title %}Записи избранных авторов{% endblock %}
+{% block content %}
+    {% load cache %}
+    {% cache 20 follow_page %}
+        <h1>Записи авторов, на которых подписан пользователь</h1>
+        {% for post in page_obj %}
+            {% include "includes/post_card.html" %}
+        {% endfor %}
+        {% include 'includes/switcher.html' %}
+    {% endcache %}
+    {% if page_obj.has_other_pages %}
+        {% include 'includes/paginator.html' %}
+    {% endif %}
+{% endblock %}
