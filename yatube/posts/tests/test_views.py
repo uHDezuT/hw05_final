@@ -10,9 +10,7 @@ class PostPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user = User.objects.create(
-            username='post_author',
-        )
+        cls.user = User.objects.create_user('post_author')
         cls.group = Group.objects.create(
             title='Название группы',
             slug='slug',
@@ -32,6 +30,7 @@ class PostPagesTests(TestCase):
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        cache.clear()
 
     def test_views_use_correct_template(self):
         """URL-адреса использует соответствующий шаблон."""
@@ -196,9 +195,7 @@ class CacheViewsTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user = User.objects.create(
-            username='post_author',
-        )
+        cls.user = User.objects.create_user('post_author')
         cls.group = Group.objects.create(
             title='Название группы',
             slug='slug',
@@ -213,6 +210,7 @@ class CacheViewsTest(TestCase):
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        cache.clear()
 
     def test_cache_index(self):
         """Проверка хранения и очищения кэша для index."""
@@ -241,9 +239,9 @@ class FollowViewsTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user = User.objects.create(username='post_author',)
-        cls.user_follow = User.objects.create_user(username='user_follow')
-        cls.user_unfollow = User.objects.create_user(username='user_unfollow')
+        cls.user = User.objects.create_user('post_author')
+        cls.user_follow = User.objects.create_user('user_follow')
+        cls.user_unfollow = User.objects.create_user('user_unfollow')
         cls.group = Group.objects.create(
             title='Название группы',
             slug='slug',
@@ -263,6 +261,7 @@ class FollowViewsTest(TestCase):
         self.authorized_user_follow.force_login(self.user_follow)
         self.authorized_user_unfollow = Client()
         self.authorized_user_unfollow.force_login(self.user_unfollow)
+        cache.clear()
 
     def test_follow(self):
         """Подписка на автора."""

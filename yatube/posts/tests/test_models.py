@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import TestCase
 
 from ..models import Group, Post
@@ -10,7 +11,7 @@ class PostModelTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user = User.objects.create_user(username='auth')
+        cls.user = User.objects.create_user('auth')
         cls.group = Group.objects.create(
             title='Новая группа',
             slug='slug',
@@ -24,16 +25,15 @@ class PostModelTest(TestCase):
             author=cls.user,
             text="Не более 15 символов может уместиться в превью"
         )
+        cache.clear()
 
     def test_model_post_have_correct_object_names(self):
-        """У модели Post корректно работает __str__."""
         post = PostModelTest.post
         long_post = PostModelTest.long_post
         self.assertEqual(str(long_post), "Не более 15 сим")
         self.assertEqual(str(post), "Новый пост")
 
     def test_model_group_have_correct_object_names(self):
-        """У модели Group корректно работает __str__."""
         post_group = PostModelTest.group
         expected_object_name_group = post_group.title
         self.assertEqual(expected_object_name_group, str(post_group))

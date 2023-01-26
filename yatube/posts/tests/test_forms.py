@@ -1,18 +1,24 @@
+import shutil
+import tempfile
+
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
+from django.conf import settings
 
 from ..models import Group, Post, User, Comment
 
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostFormTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.user = User.objects.create(
-            username='post_author',
-        )
+        cls.user = User.objects.create_user('post_author')
         cls.small_gif = (
             b'\x47\x49\x46\x38\x39\x61\x02\x00'
             b'\x01\x00\x80\x00\x00\x00\x00\x00'
@@ -44,6 +50,7 @@ class PostFormTests(TestCase):
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        cache.clear()
 
     def test_new_post_success(self):
         """Создание поста прошло успешно и запись сохранена в БД."""
@@ -191,3 +198,8 @@ class PostFormTests(TestCase):
                     kwargs={'post_id': self.post.id}))
         self.assertEqual(Comment.objects.count(), comment_count)
         self.assertFalse(response.context['comments'])
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
+        super().tearDownClass()

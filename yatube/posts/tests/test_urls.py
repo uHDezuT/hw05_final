@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import TestCase, Client
 
 from ..models import Post, Group
@@ -15,12 +16,8 @@ class StaticURLTests(TestCase):
             slug='slug',
             description='Новое описание группы',
         )
-        cls.user = User.objects.create_user(
-            username='post_author'
-        )
-        cls.user_2 = User.objects.create_user(
-            username='another_user'
-        )
+        cls.user = User.objects.create_user('post_author')
+        cls.user_2 = User.objects.create_user('another_user')
         cls.post = Post.objects.create(
             text='Текст',
             author=StaticURLTests.user,
@@ -33,6 +30,7 @@ class StaticURLTests(TestCase):
         self.post_author.force_login(self.user)
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user_2)
+        cache.clear()
 
     def test_guest_client_urls_status_code(self):
         """Адреса для НЕ авторизированного пользователя."""
